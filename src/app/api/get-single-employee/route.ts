@@ -1,5 +1,6 @@
 import dbConnect from "@/lib/dbConnect";
 import { UserModel } from "@/model/AllModels";
+import { LeaveRequestModel } from "@/model/AllModels";
 
 export async function POST(request: Request) {
     try {
@@ -11,7 +12,7 @@ export async function POST(request: Request) {
             return new Response(
                 JSON.stringify({
                     success: false,
-                    messages: "User ID is required",
+                    message: "User ID is required",
                 }),
                 { status: 400 }
             );
@@ -23,16 +24,25 @@ export async function POST(request: Request) {
             return new Response(
                 JSON.stringify({
                     success: false,
-                    messages: "User not found",
+                    message: "User not found",
                 }),
                 { status: 404 }
             );
         }
 
+
+        const leaveRequests = await LeaveRequestModel.find({
+            _id: { $in: user.leaveRequests }
+        });
+
         return new Response(
             JSON.stringify({
                 success: true,
-                messages: user,
+                message: "Leave requests fetched successfully",
+                data: {
+                    user,
+                    leaveRequests
+                }
             }),
             { status: 200 }
         );
@@ -41,7 +51,7 @@ export async function POST(request: Request) {
         return new Response(
             JSON.stringify({
                 success: false,
-                messages: "An unexpected error occurred",
+                message: "An unexpected error occurred",
             }),
             { status: 500 }
         );
