@@ -3,12 +3,12 @@
 import { useState, useEffect, useCallback } from "react"
 import { useParams } from "next/navigation"
 import Link from "next/link"
-import { Calendar, momentLocalizer } from "react-big-calendar"
-import moment from "moment"
 import "react-big-calendar/lib/css/react-big-calendar.css"
 import { Button } from "@/components/ui/button"
 import axios from "axios"
 import { IUser } from "@/model/AllModels"
+import { Calendar, momentLocalizer } from "react-big-calendar"
+import moment from "moment"
 
 const localizer = momentLocalizer(moment)
 
@@ -39,14 +39,15 @@ export default function EmployeeDetails() {
   const singleUserData = useCallback(async () => {
     try {
       const fetchedData = await axios.post(`/api/get-single-employee`, { id });
-      console.log(fetchedData.data?.messages);
-      setEmployee(fetchedData.data?.messages);
+      console.log(fetchedData.data.data.user);
+      setEmployee(fetchedData.data.data.user);
+      setLeaveRequests(fetchedData.data.data.leaveRequests);
     }
     catch (error) { console.log(error) }
   }, [id])
 
   useEffect(() => {
-  
+
     singleUserData();
 
     // TODO: Fetch actual attendance data from the API
@@ -66,26 +67,6 @@ export default function EmployeeDetails() {
     ]
     setAttendanceEvents(mockAttendanceEvents)
 
-    // TODO: Fetch actual leave request data from the API
-    const mockLeaveRequests: LeaveRequest[] = [
-      {
-        id: "1",
-        type: "VACATION",
-        subject: "Annual leave",
-        status: "APPROVED",
-        startDate: "2025-02-15",
-        endDate: "2025-02-20",
-      },
-      {
-        id: "2",
-        type: "SICK",
-        subject: "Flu",
-        status: "REVIEW",
-        startDate: "2025-03-01",
-        endDate: "2025-03-03",
-      },
-    ]
-    setLeaveRequests(mockLeaveRequests)
   }, [id, singleUserData])
 
   if (!employee) {
@@ -109,7 +90,7 @@ export default function EmployeeDetails() {
         <Button asChild className="mt-4">
           <Link href={`/employee/${id}/edit`}>Edit Employee</Link>
         </Button>
-        
+
       </div>
       <h2 className="text-2xl font-bold mb-4">Attendance Calendar</h2>
       <div className="bg-white shadow-md rounded-lg p-6 mb-8">
@@ -118,7 +99,7 @@ export default function EmployeeDetails() {
           events={attendanceEvents}
           startAccessor="start"
           endAccessor="end"
-          style={{ height: 500 }}
+          style={{ height: 400 }}
         />
       </div>
       <h2 className="text-2xl font-bold mb-4">Leave Requests</h2>
@@ -132,13 +113,21 @@ export default function EmployeeDetails() {
               <th className="py-2 px-4 border-b">Date Range</th>
             </tr>
           </thead>
-          <tbody>
-            {leaveRequests.map((request) => (
-              <tr key={request.id}>
+          <tbody className="text-center">
+            {leaveRequests.map((request, index) => (
+              <tr key={index}>
                 <td className="py-2 px-4 border-b">{request.type}</td>
                 <td className="py-2 px-4 border-b">{request.subject}</td>
                 <td className="py-2 px-4 border-b">{request.status}</td>
-                <td className="py-2 px-4 border-b">{`${request.startDate} to ${request.endDate}`}</td>
+                <td className="py-2 px-4 border-b">{`${new Date(request.startDate).toLocaleString('en-US', {
+                  month: 'long',
+                  day: 'numeric',
+                  year: 'numeric'
+                })} to ${new Date(request.endDate).toLocaleString('en-US', {
+                  month: 'long',
+                  day: 'numeric',
+                  year: 'numeric'
+                })}`}</td>
               </tr>
             ))}
           </tbody>
