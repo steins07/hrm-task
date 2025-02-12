@@ -2,13 +2,13 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { useParams } from "next/navigation"
-import Link from "next/link"
 import "react-big-calendar/lib/css/react-big-calendar.css"
 import { Button } from "@/components/ui/button"
 import axios from "axios"
 import { IUser } from "@/model/AllModels"
 import { Calendar, momentLocalizer } from "react-big-calendar"
 import moment from "moment"
+import Link from "next/link"
 
 const localizer = momentLocalizer(moment)
 
@@ -30,6 +30,7 @@ interface LeaveRequest {
 }
 
 export default function EmployeeDetails() {
+
   const { id } = useParams()
   console.log(id)
   const [employee, setEmployee] = useState<IUser | null>(null)
@@ -77,20 +78,26 @@ export default function EmployeeDetails() {
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6">Employee Details</h1>
       <div className="bg-white shadow-md rounded-lg p-6 mb-8">
-        <h2 className="text-2xl font-semibold mb-4">{employee.username}</h2>
-        <p>
-          <strong>Email:</strong> {employee.email}
-        </p>
-        <p>
-          <strong>Name:</strong> {employee.username}
-        </p>
-        <p>
-          <strong>Role:</strong> {employee.role}
-        </p>
-        <Button asChild className="mt-4">
-          <Link href={`/employee/${id}/edit`}>Edit Employee</Link>
-        </Button>
-
+        <div className="h-12 w-12 rounded-full bg-zinc-400 inline-flex items-center justify-center">
+          <span className="text-xl font-semibold text-black">
+            {employee.username.charAt(0)}
+          </span>
+        </div>
+        <h2 className="text-2xl font-semibold mb-4 inline px-4">{employee.username}</h2>
+        <div className="pl-16">
+          <p>
+            <strong>Email:</strong> {employee.email}
+          </p>
+          <p>
+            <strong>Username:</strong> {employee.username}
+          </p>
+          <p>
+            <strong>Role:</strong> {employee.role}
+          </p>
+          <Button className="mt-4">
+            <Link href={`/employee/${id}/edit`}>Edit Employee</Link>
+          </Button>
+        </div>
       </div>
       <h2 className="text-2xl font-bold mb-4">Attendance Calendar</h2>
       <div className="bg-white shadow-md rounded-lg p-6 mb-8">
@@ -99,7 +106,7 @@ export default function EmployeeDetails() {
           events={attendanceEvents}
           startAccessor="start"
           endAccessor="end"
-          style={{ height: 400 }}
+          style={{ height: 400}}
         />
       </div>
       <h2 className="text-2xl font-bold mb-4">Leave Requests</h2>
@@ -114,7 +121,7 @@ export default function EmployeeDetails() {
             </tr>
           </thead>
           <tbody className="text-center">
-            {leaveRequests.map((request, index) => (
+            {leaveRequests.length!==0? (leaveRequests.map((request, index) => (
               <tr key={index}>
                 <td className="py-2 px-4 border-b">{request.type}</td>
                 <td className="py-2 px-4 border-b">{request.subject}</td>
@@ -129,7 +136,10 @@ export default function EmployeeDetails() {
                   year: 'numeric'
                 })}`}</td>
               </tr>
-            ))}
+            ))):(
+              <tr className="font-semibold text-sm">
+                <td colSpan={4} className="py-2 px-4 border-b "> No Leave Requests Made Till Now</td>
+              </tr>)}
           </tbody>
         </table>
       </div>
