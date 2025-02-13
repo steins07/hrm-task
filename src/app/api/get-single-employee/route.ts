@@ -1,5 +1,5 @@
 import dbConnect from "@/lib/dbConnect";
-import { UserModel } from "@/model/AllModels";
+import { AttendanceModel, UserModel } from "@/model/AllModels";
 import { LeaveRequestModel } from "@/model/AllModels";
 
 export async function POST(request: Request) {
@@ -19,7 +19,7 @@ export async function POST(request: Request) {
         }
 
         const user = await UserModel.findById(id);
-
+        
         if (!user) {
             return new Response(
                 JSON.stringify({
@@ -29,11 +29,16 @@ export async function POST(request: Request) {
                 { status: 404 }
             );
         }
-
+        
+        const subordinatesList= await UserModel.find({_id: { $in: user.employees }});
 
         const leaveRequests = await LeaveRequestModel.find({
             _id: { $in: user.leaveRequests }
         });
+
+        const attendanceData = await AttendanceModel.find({
+            _id: { $in: user.attendance }
+        })
 
         return new Response(
             JSON.stringify({
@@ -41,7 +46,9 @@ export async function POST(request: Request) {
                 message: "Leave requests fetched successfully",
                 data: {
                     user,
-                    leaveRequests
+                    leaveRequests,
+                    attendanceData,
+                    subordinatesList
                 }
             }),
             { status: 200 }
