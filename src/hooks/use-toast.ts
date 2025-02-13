@@ -1,5 +1,3 @@
-"use client"
-
 // Inspired by react-hot-toast library
 import * as React from "react"
 
@@ -18,12 +16,39 @@ type ToasterToast = ToastProps & {
   action?: ToastActionElement
 }
 
-const actionTypes = {
-  ADD_TOAST: "ADD_TOAST",
-  UPDATE_TOAST: "UPDATE_TOAST",
-  DISMISS_TOAST: "DISMISS_TOAST",
-  REMOVE_TOAST: "REMOVE_TOAST",
-} as const
+// Removed unused actionTypes variable
+// const actionTypes = {
+//   ADD_TOAST: "ADD_TOAST",
+//   UPDATE_TOAST: "UPDATE_TOAST",
+//   DISMISS_TOAST: "DISMISS_TOAST",
+//   REMOVE_TOAST: "REMOVE_TOAST",
+// } as const
+
+type AddToastAction = {
+  type: "ADD_TOAST"
+  toast: ToasterToast
+}
+
+type UpdateToastAction = {
+  type: "UPDATE_TOAST"
+  toast: Partial<ToasterToast>
+}
+
+type DismissToastAction = {
+  type: "DISMISS_TOAST"
+  toastId?: ToasterToast["id"]
+}
+
+type RemoveToastAction = {
+  type: "REMOVE_TOAST"
+  toastId?: ToasterToast["id"]
+}
+
+type Action = 
+  | AddToastAction
+  | UpdateToastAction
+  | DismissToastAction
+  | RemoveToastAction
 
 let count = 0
 
@@ -31,26 +56,6 @@ function genId() {
   count = (count + 1) % Number.MAX_SAFE_INTEGER
   return count.toString()
 }
-
-type ActionType = typeof actionTypes
-
-type Action =
-  | {
-      type: ActionType["ADD_TOAST"]
-      toast: ToasterToast
-    }
-  | {
-      type: ActionType["UPDATE_TOAST"]
-      toast: Partial<ToasterToast>
-    }
-  | {
-      type: ActionType["DISMISS_TOAST"]
-      toastId?: ToasterToast["id"]
-    }
-  | {
-      type: ActionType["REMOVE_TOAST"]
-      toastId?: ToasterToast["id"]
-    }
 
 interface State {
   toasts: ToasterToast[]
