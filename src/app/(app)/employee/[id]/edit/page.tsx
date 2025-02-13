@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import axios, { AxiosError } from 'axios';
 import { useToast } from '@/hooks/use-toast';
-import ApiResponse from '@/types/ApiResponse';
+import IApiResponse from '@/types/ApiResponse';
 import {
   Form,
   FormControl,
@@ -20,6 +20,7 @@ import { Loader2 } from 'lucide-react';
 import { IUser} from '@/model/AllModels';
 
 
+
 const EditEmployee = () => {
   const { id } = useParams();
   const router = useRouter();
@@ -31,19 +32,18 @@ const EditEmployee = () => {
     defaultValues: {
       username: '',
       email: '',
-      role: 'EMPLOYEE',
+      role: "",
     },
   });
 
   const fetchEmployee = useCallback(async () => {
     try {
-      const response = await axios.post<ApiResponse>(`/api/get-single-employee`, { id });
-      const employeeData = response.data?.messages;
-      if (employeeData) {
+      const response = await axios.post(`/api/get-single-employee`, { id });
+      console.log('Fetched employee data:', response?.data.data.user);
+      const employeeData = response.data.data.user;
         form.setValue('username', employeeData.username);
         form.setValue('email', employeeData.email);
         form.setValue('role', employeeData.role);
-      }
     } catch (error) {
       console.error('Error fetching employee data:', error);
     } finally {
@@ -59,12 +59,14 @@ const EditEmployee = () => {
     setIsSubmitting(true);
     try {
       console.log('Updating employee:', data);
-      await axios.post<ApiResponse>(`/api/update-employee`, { id, ...data });
-      toast({ title: 'Success', description: 'Employee updated successfully!' });
+      const res = await axios.post<IApiResponse>(`/api/update-employee`, { id, ...data });
+      if (res.data.success === true) {
+        toast({ title: 'Success', description: 'Employee updated successfully!' });
+      }
       router.push(`/employee/${id}`);
     } catch (error) {
       console.error('Error updating employee:', error);
-      const axiosError = error as AxiosError<ApiResponse>;
+      const axiosError = error as AxiosError<IApiResponse>;
       const errorMessage = axiosError.response?.data.messages;
       toast({ title: 'Update Failed', description: errorMessage, variant: 'destructive' });
     } finally {
