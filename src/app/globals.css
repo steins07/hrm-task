@@ -70,3 +70,31 @@ body {
     @apply bg-background text-foreground;
   }
 }
+.rbc-event {
+  position: relative;
+  background-color: #1E5AA5 !important;
+  color: black !important;
+  border-radius: 8px !important;
+  border: none !important;
+  font-size: small;
+  height: auto !important; /* Allow it to expand based on content */
+  padding: 10px !important; /* Add padding for spacing */
+  text-align: center; /* Center the text */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  word-wrap: break-word;
+  white-space: normal; /* Allow text to wrap */
+
+}
+.rbc-event:hover{
+  scale: .8 !important;
+  font-size: smaller;
+  z-index: 1;
+}
+.rbc-event-content{
+  white-space: normal !important;
+  word-wrap: break-word !important;
+}
+
+
