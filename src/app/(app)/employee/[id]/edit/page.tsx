@@ -17,9 +17,12 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
-import { IUser} from '@/model/AllModels';
 
-
+interface UserData {
+  username: string, 
+  email: string, 
+  role: string
+}
 
 const EditEmployee = () => {
   const { id } = useParams();
@@ -28,11 +31,11 @@ const EditEmployee = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const form = useForm<IUser>({
+  const form = useForm<UserData>({
     defaultValues: {
       username: '',
       email: '',
-      role: "",
+      role: '',
     },
   });
 
@@ -40,10 +43,10 @@ const EditEmployee = () => {
     try {
       const response = await axios.post(`/api/get-single-employee`, { id });
       console.log('Fetched employee data:', response?.data.data.user);
-      const employeeData = response.data.data.user;
-        form.setValue('username', employeeData.username);
-        form.setValue('email', employeeData.email);
-        form.setValue('role', employeeData.role);
+      const employeeData = response?.data.data.user;
+      form.setValue('username', employeeData.username);
+      form.setValue('email', employeeData.email);
+      form.setValue('role', employeeData.role);
     } catch (error) {
       console.error('Error fetching employee data:', error);
     } finally {
@@ -55,7 +58,7 @@ const EditEmployee = () => {
     fetchEmployee();
   }, [fetchEmployee]);
 
-  const onSubmit = async (data: IUser) => {
+  const onSubmit = async (data: UserData) => {
     setIsSubmitting(true);
     try {
       console.log('Updating employee:', data);
