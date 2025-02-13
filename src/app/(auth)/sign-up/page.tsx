@@ -6,7 +6,7 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import axios, { AxiosError } from "axios"
-import ApiResponse from "@/types/ApiResponse"
+import IApiResponse from "@/types/ApiResponse"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -31,7 +31,7 @@ const Page = () => {
     const onSubmit = async (data: { username: string, email: string, password: string, role: string }) => {
         setIsSubmitting(true);
         try {
-            const response = await axios.post<ApiResponse>(`/api/sign-up`, data);
+            const response = await axios.post<IApiResponse>(`/api/sign-up`, data);
             toast({
                 title: 'Success',
                 description: response.data?.messages
@@ -39,7 +39,7 @@ const Page = () => {
             router.replace(`/sign-in`);
         } catch (error) {
             console.error("Error in signup of user: ", error);
-            const axiosError = error as AxiosError<ApiResponse>;
+            const axiosError = error as AxiosError<IApiResponse>;
             const errorMessage = axiosError.response?.data.messages;
             toast({
                 title: 'Signup Failed',
