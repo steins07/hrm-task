@@ -38,9 +38,8 @@ export async function DELETE(
                 { status: 404 }
             );
         }
-
         return Response.json(
-            { messages: 'Message del', success: true },
+            { messages: `User ${updateResult.username.toUpperCase()}'s account was deleted sucessfully.`, success: true },
             { status: 200 }
         );
     } catch (error) {
