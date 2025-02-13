@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
 import axios, { AxiosError } from "axios"
 import { useToast } from "@/hooks/use-toast"
-import ApiResponse from "@/types/ApiResponse"
+import IApiResponse from "@/types/ApiResponse"
 interface LeaveRequest {
   _id: string
   userId: string
@@ -69,7 +69,7 @@ export default function LeaveRequests() {
       }
     } catch (error) {
       console.error("Error updating leave request status:", error)
-      const axiosError = error as AxiosError<ApiResponse>
+      const axiosError = error as AxiosError<IApiResponse>
       toast({
         title: "Failed",
         description: axiosError.response?.data.messages,
