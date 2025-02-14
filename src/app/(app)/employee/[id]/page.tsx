@@ -56,7 +56,6 @@ export default function EmployeeDetails() {
         })
       }
       const transformedData = transformAttendanceData(fetchedData.attendanceData)
-      console.log("Transformed data:", transformedData);
       setAttendanceEvents(transformedData);
       setSubordinates(fetchedData.subordinatesList)
       setEmployee(fetchedData.user)

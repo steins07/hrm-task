@@ -42,7 +42,6 @@ const EditEmployee = () => {
   const fetchEmployee = useCallback(async () => {
     try {
       const response = await axios.post(`/api/get-single-employee`, { id });
-      console.log('Fetched employee data:', response?.data.data.user);
       const employeeData = response?.data.data.user;
       form.setValue('username', employeeData.username);
       form.setValue('email', employeeData.email);
