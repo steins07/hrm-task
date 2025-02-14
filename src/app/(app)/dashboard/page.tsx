@@ -16,29 +16,12 @@ import axios, { AxiosError } from "axios"
 import { useToast } from "@/hooks/use-toast"
 import IApiResponse from "@/types/ApiResponse"
 import { IUser } from "@/model/AllModels"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger
-} from "@/components/ui/alert-dialog"
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious
-} from "@/components/ui/pagination"
 import { User } from "next-auth"
 import { useSession } from "next-auth/react"
-
-
+import { Loader2 } from "lucide-react"
+import EmployeeTable from "@/components/EmployeeTable"
+import Paginator from "@/components/Paginator"
+import { Separator } from "@/components/ui/separator"
 
 
 interface Attendance {
@@ -46,39 +29,49 @@ interface Attendance {
   checkIn: string
   checkOut: string
 }
-
+interface LastAttendance {
+  date: string
+  checkIn: string
+  checkOut: string
+  createdAt?: string
+  updatedAt?: string
+}
 export default function Dashboard() {
   const { data: session } = useSession();
-    const user: User = session?.user as User;
-  const [hrAttendance, setHrAttendance] = useState<Attendance>({
-    date: new Date().toISOString().split("T")[0],
-    checkIn: "No check in time recorded",
-    checkOut: "No check out time recorded",
-  })
+  const user: User = session?.user as User;
   const [checkInTime, setCheckInTime] = useState<Date | null>(null)
   const [checkOutTime, setCheckOutTime] = useState<Date | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [users, setUsers] = useState<IUser[]>([])
   const [currentPage, setCurrentPage] = useState(1)
   const [disableButton, setDisableButton] = useState(false)
-  const [itemsPerPage] = useState(5)
+  const [itemsPerPage] = useState(4)
+  const [lastAttendance, setLastAttendance] = useState<LastAttendance | null>(null)
   const { toast } = useToast();
 
   // Get current employees
   const indexOfLastEmployee = currentPage * itemsPerPage
   const indexOfFirstEmployee = indexOfLastEmployee - itemsPerPage
   const currentEmployees = users.slice(indexOfFirstEmployee, indexOfLastEmployee)
+  const [hrAttendance, setHrAttendance] = useState<Attendance>({
+    date: new Date().toISOString().split("T")[0],
+    checkIn: "No check in time recorded",
+    checkOut: "No check out time recorded",
+  })
+
 
   // Change page
-  const paginate = (pageNumber: number) => setCurrentPage(pageNumber)
+  const paginate = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+  }
 
+  //api call to get all user
   const getAllUsers = useCallback(
     async () => {
       setIsLoading(true);
       try {
         const response = await axios.get("/api/get-all-user");
-          setUsers(response.data?.messages||[]);
-        
+        setUsers(response.data?.messages || []);
       } catch (error) {
         const axiosError = error as AxiosError<IApiResponse>;
 
@@ -93,9 +86,37 @@ export default function Dashboard() {
         setIsLoading(false);
       }
     },
-    [toast,setUsers]
+    [toast, setUsers]
   );
 
+  const getRecentAttendance = useCallback(async () => {
+    try {
+      const res = await axios.get(`/api/get-attendance/${user?._id}`, {
+        timeout: 5000, // Timeout set to 5000ms (5 seconds)
+      });
+      setLastAttendance(res.data.lastAttendance);
+    } catch (error) {
+      const axiosError = error as AxiosError<IApiResponse>;
+
+      toast({
+        title: "Error",
+        description: axiosError.response?.data.messages,
+        variant: "destructive",
+      });
+    }
+  }, [user?._id, toast]);
+
+
+
+  useEffect(() => {
+    getAllUsers();
+    if (user) {
+      getRecentAttendance();
+    }
+  }, [getAllUsers, getRecentAttendance, user])
+
+
+  //api call to delete employee
   const handleDeleteEmployee = async (id: string) => {
     try {
       const res = await axios.delete(`/api/delete-employee/${id}`)
@@ -117,10 +138,7 @@ export default function Dashboard() {
     }
   }
 
-  useEffect(() => {
-    getAllUsers()
-  }, [getAllUsers])
-
+  //api call to submit attendance
   const handleSubmitAttendance = async (checkIn: Date, checkOut: Date) => {
     if (!checkIn && !checkOut) {
       toast({
@@ -129,10 +147,7 @@ export default function Dashboard() {
         variant: "destructive"
       })
     }
-
-
     try {
-      console.log("from handle submit att: ", checkIn, checkOut)
       const res = await axios.post(`/api/add-attendance`, { data: { checkIn, checkOut } })
       toast({
         title: "Success",
@@ -151,48 +166,69 @@ export default function Dashboard() {
       })
     }
   }
+
+
+  //handle form data changes
   const handleAddAttendance = (e: React.FormEvent) => {
     e.preventDefault();
     if (checkInTime && checkOutTime) {
+      // Convert local time to UTC
+      const checkInUTC = new Date(checkInTime.getTime() - checkInTime.getTimezoneOffset() * 60000);
+      const checkOutUTC = new Date(checkOutTime.getTime() - checkOutTime.getTimezoneOffset() * 60000);
+
       const newAttendance: Attendance = {
         date: new Date().toISOString().split("T")[0],
-        checkIn: checkInTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }),
-        checkOut: checkOutTime?.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }),
-      }
-      setHrAttendance(newAttendance)
+        checkIn: checkInUTC.toISOString(), // Send UTC time to server
+        checkOut: checkOutUTC.toISOString(), // Send UTC time to server
+      };
+
+      setHrAttendance(newAttendance);
       toast({
         title: "Attendance Recorded",
         description: "Successfully recorded attendance",
-        variant: "default"
-      })
+        variant: "default",
+      });
     }
+  };
 
+
+  if (isLoading) {
+    return <div className="flex items-center justify-center text-5xl pr-5">
+      Loading <Loader2 className="animate-spin inline w-16 h-16 duration-1000" />
+    </div>
   }
 
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleString()
+  }
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">HR Dashboard</h1>
-      {user?.role === "HR" && (<div className="flex space-x-4 mb-4">
+      {user?.role === "EMPLOYEE" && <h1 className="text-3xl font-bold mb-4">Employee Dashboard</h1>}
+      {user?.role === "HR" && <h1 className="text-3xl font-bold mb-4">HR Dashboard</h1>}
+      {user?.role === "MANAGER" && <h1 className="text-3xl font-bold mb-4">Manager Dashboard</h1>}
+      {user?.role === "SUPER_ADMIN" && <h1 className="text-3xl font-bold mb-4">Super Admin Dashboard</h1>}
+
+      <Separator className="mb-4 drop-shadow-xl" />
+      {user?.role === "HR" && (<div className="flex space-x-4 mb-4 pl-5">
         <Button asChild>
           <Link href="/leave-requests">View Leave Requests</Link>
         </Button>
         <Button asChild>
           <Link href="/add-employee">Add New Employee</Link>
         </Button>
-      </div>)}
+      </div>)
+      }
+      <Separator className="mb-4 drop-shadow-xl" />
       <div className="bg-white shadow-md rounded-lg p-6 mb-8">
-        <h2 className="text-2xl font-semibold mb-4">Your Attendance</h2>
-        {hrAttendance ? (
-          <p>
-            Date: {hrAttendance.date}
-            <br />
-            Check-in: {hrAttendance.checkIn}
-            <br />
-            Check-out: {hrAttendance.checkOut}
-          </p>
-        ) : (
-          <p>No attendance recorded for today</p>
-        )}
+        <h2 className="text-xl font-semibold mb-4">Your Role: {user?.role}</h2>
+        <h2 className="text-xl font-semibold mb-4">Record Your Attendance</h2>
+        <p>
+          Date: {hrAttendance.date}
+          <br />
+          Check-in: {hrAttendance.checkIn}
+          <br />
+          Check-out: {hrAttendance.checkOut}
+        </p>
         <Dialog>
           <DialogTrigger asChild>
             <Button disabled={disableButton} className="mt-4">Record Attendance</Button>
@@ -207,7 +243,7 @@ export default function Dashboard() {
                 <Input
                   type="datetime-local"
                   id="checkIn"
-                  value={checkInTime ? checkInTime.toISOString().slice(0, 16) : ""}
+                  value={checkInTime ? new Date(checkInTime.getTime() - checkInTime.getTimezoneOffset() * 60000).toISOString().slice(0, 16) : ""}
                   onChange={(e) => setCheckInTime(new Date(e.target.value))}
                   required
                 />
@@ -217,7 +253,8 @@ export default function Dashboard() {
                 <Input
                   type="datetime-local"
                   id="checkOut"
-                  value={checkOutTime ? checkOutTime.toISOString().slice(0, 16) : ""}
+                  value={checkOutTime ? new Date(checkOutTime.getTime() - checkOutTime.getTimezoneOffset() * 60000).toISOString().slice(0, 16) : ""}
+
                   onChange={(e) => setCheckOutTime(new Date(e.target.value))}
                 />
               </div>
@@ -225,84 +262,59 @@ export default function Dashboard() {
             </form>
           </DialogContent>
         </Dialog>
-        {checkInTime && checkOutTime && <Button className="ml-2" onClick={() => handleSubmitAttendance(checkInTime, checkOutTime)}>Submit Attendance</Button>}
+        {checkInTime && checkOutTime && <Button className="ml-2" onClick={() => {
+          handleSubmitAttendance(checkInTime, checkOutTime)
+          window.location.reload()
+        }}>Submit Attendance</Button>}
       </div>
-      <h2 className="text-2xl font-bold mb-4">Employee List</h2>
-      {!isLoading && users ? (
-        <table className="min-w-full bg-white border border-gray-300">
-          <thead>
-            <tr>
-              <th className="py-2 px-4 border-b">Name</th>
-              <th className="py-2 px-4 border-b">Email</th>
-              <th className="py-2 px-4 border-b">Role</th>
-              <th className="py-2 px-4 border-b">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="text-center">
-            {currentEmployees.map((user: IUser, index) => (
-              <tr key={index}>
-                <td className="py-2 px-4 border-b">{user.username}</td>
-                <td className="py-2 px-4 border-b">{user.email}</td>
-                <td className="py-2 px-4 border-b">{user.role}</td>
-                <td className="py-2 px-4 border-b gap-2">
-                  <Button asChild variant="outline" className="mr-2">
-                    <Link href={`/employee/${user._id}`}>View Details</Link>
-                  </Button>
-                  <Button asChild variant="outline" className="mr-2">
-                    <Link href={`/employee/${user._id}/edit`}>Edit</Link>
-                  </Button>
-                  <AlertDialog >
-                    <AlertDialogTrigger asChild>
-                      <Button variant="destructive">Delete</Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          This action cannot be undone. This will permanently delete {user.username}&apos;s account and remove
-                          their data from our servers.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => handleDeleteEmployee(user._id as string)}>Delete</AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </td>
+      {lastAttendance && (
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold mb-4">Last Attendance</h2>
+          <table className="min-w-full bg-white border border-gray-300">
+            <thead>
+              <tr>
+                <th className="py-2 px-4 border-b">Check In</th>
+                <th className="py-2 px-4 border-b">Check Out</th>
               </tr>
-            ))}
-          </tbody>
-        </table>) : <p>no employee.</p>}
-      <div className="mt-4">
-        <Pagination>
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious
-                href="#"
-                onClick={() => paginate(currentPage - 1)}
-                className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
-              />
-            </PaginationItem>
-            {[...Array(Math.ceil(users.length / itemsPerPage))].map((_, index) => (
-              <PaginationItem key={index}>
-                <PaginationLink href="#" onClick={() => paginate(index + 1)} isActive={currentPage === index + 1}>
-                  {index + 1}
-                </PaginationLink>
-              </PaginationItem>
-            ))}
-            <PaginationItem>
-              <PaginationNext
-                href="#"
-                onClick={() => paginate(currentPage + 1)}
-                className={
-                  currentPage === Math.ceil(users.length / itemsPerPage) ? "pointer-events-none opacity-50" : ""
-                }
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
-      </div>
+            </thead>
+            <tbody>
+                <tr className="text-center">
+                  <td className="py-2 px-4 border-b">{formatDate(lastAttendance.checkIn)}</td>
+                  <td className="py-2 px-4 border-b">{formatDate(lastAttendance.checkOut)}</td>
+                </tr>
+            </tbody>
+          </table>
+        </div>
+      )}
+      {lastAttendance===null && (
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold mb-4">Last Attendance</h2>
+          <table className="min-w-full bg-white border border-gray-300">
+            <thead>
+              <tr>
+                <th className="py-2 px-4 border-b">Check In</th>
+                <th className="py-2 px-4 border-b">Check Out</th>
+              </tr>
+            </thead>
+            <tbody>
+                <tr className=" text-center text-lg font semi-bold">
+                  <td colSpan={2}>No attendance to display</td>
+                </tr>
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {user?.role === "HR" && <>
+        <h2 className="text-2xl font-bold mb-4">Employee List</h2>
+        {!isLoading && users ? (
+          <EmployeeTable currentEmployees={currentEmployees} handleDeleteEmployee={handleDeleteEmployee} />
+        ) : (
+          <p>no employee.</p>
+        )
+        }
+        <Paginator users={users} itemsPerPage={itemsPerPage} currentPage={currentPage} paginate={paginate} />
+      </>}
     </div>
   )
 }
