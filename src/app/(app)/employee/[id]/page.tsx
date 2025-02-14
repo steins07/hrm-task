@@ -13,7 +13,7 @@ import Link from "next/link"
 import transformAttendanceData from "@/lib/transformAttendanceData"
 import { useToast } from "@/hooks/use-toast"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import { ChevronDown, ChevronUp } from "lucide-react"
+import { ChevronDown, ChevronLeft, ChevronUp } from "lucide-react"
 
 const localizer = momentLocalizer(moment)
 interface AttendanceEvent {
@@ -94,8 +94,11 @@ export default function EmployeeDetails() {
           <p>
             <strong>Role:</strong> {employee.role}
           </p>
-          <Button className="mt-4">
+          <Button className="mt-4 mr-2">
             <Link href={`/employee/${id}/edit`}>Edit Employee</Link>
+          </Button>
+          <Button className="mt-4 pl-2">
+            <Link href={`/dashboard`}> <ChevronLeft className="h-6 w-6 mb-1 inline"/>Go back to dashboard</Link>
           </Button>
         </div>
       </div>

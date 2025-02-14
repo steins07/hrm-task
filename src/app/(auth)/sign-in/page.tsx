@@ -1,6 +1,5 @@
 "use client";
 import { useForm } from "react-hook-form";
-import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -115,15 +114,6 @@ const SignIn = () => {
                         </Button>
                     </form>
                 </Form>
-
-                <div className="text-center mt-4">
-                    <p>
-                        Don&apos;t have an account? &nbsp;
-                        <Link href="/sign-up" className="text-blue-600 hover:text-blue-800 ">
-                            Sign up
-                        </Link>
-                    </p>
-                </div>
             </div>
         </div>
     );
