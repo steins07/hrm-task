@@ -23,7 +23,7 @@ The following API routes are available:
 - **GET** `/api/get-all-user`: Get a list of all employees
 - **GET** `/api/get-single-employee`: Get a single employee by ID
 - **POST** `/api/create-new-employee`: Create a new employee
-- **POST** `/api/employees`: Update an existing employee
+- **POST** `/api/update-employee`: Update an existing employee
 - **DELETE** `/api/delete-employee/:id`: Delete an employee
 
 ### Attendance
