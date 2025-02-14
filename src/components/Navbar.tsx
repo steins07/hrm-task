@@ -16,7 +16,7 @@ const Navbar = () => {
         <nav className="p-2 md:p-4 shadow-md bg-gray-900 text-white">
             <div className="container mx-auto flex flex-col md:flex-row justify-between items-center">
                 <a href="/dashboard" className="text-xl font-bold mb-4 md:mb-0">
-                    Matrix HRM
+                    <i>Matrix</i> HRM
                 </a>
                 {session ? (
                     <>

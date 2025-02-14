@@ -66,7 +66,7 @@ const SignIn = () => {
                 {/* welcome */}
                 <div className="text-center">
                     <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl mb-6">
-                        Login To Matrix HRM
+                        Login To <br/> <i>Matrix</i> <span className="text-3xl">HRM</span>
                     </h1>
                     <p className="mb-4">Let&apos;s sign in to your account</p>
                 </div>
