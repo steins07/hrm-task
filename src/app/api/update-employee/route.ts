@@ -6,7 +6,6 @@ export async function POST(request: Request) {
   const { id, username, email, role } = await request.json();
 
   try {
-    console.log("Received data for update:", { id, username, email, role });
 
     if (!id) {
       return Response.json(

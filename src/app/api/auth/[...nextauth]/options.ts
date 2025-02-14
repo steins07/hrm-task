@@ -40,7 +40,7 @@ export const authOptions: NextAuthOptions = {
             throw new Error("Password is incorrect");
           }
         } catch (error) {
-          console.log(" 111error", error);
+          console.log(" error", error);
         }
       },
     }),

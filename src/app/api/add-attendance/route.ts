@@ -24,7 +24,6 @@ export async function POST(req: Request) {
             );
         }
         const userId = _user._id;
-        console.log(userId, data);
         // Create new attendance record
         const newAttendance = await AttendanceModel.create({ userId, checkIn: data.checkIn,checkOut: data.checkOut});
 
@@ -39,7 +38,7 @@ export async function POST(req: Request) {
         return Response.json(
             {
                 success: true,
-                messages: "Attendance added successfully",
+                messages: "Attendance submitted successfully",
                 data: newAttendance,
             },
             {

@@ -12,16 +12,15 @@ export default function transformAttendanceData(data: Attendance[]) {
         const checkInDate = new Date(event.checkIn);
         const checkOutDate = new Date(event.checkOut);
 
-        // // Convert to Nepal Time (GMT+5:45)
-        // checkInDate.setUTCHours(checkInDate.getUTCHours() + 5);
-        // checkInDate.setUTCMinutes(checkInDate.getUTCMinutes() + 45);
 
-        // checkOutDate.setUTCHours(checkOutDate.getUTCHours() + 5);
-        // checkOutDate.setUTCMinutes(checkOutDate.getUTCMinutes() + 45);
+        // Convert UTC to local time
+        const localCheckInTime = checkInDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+        const localCheckOutTime = checkOutDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+
 
         return {
             id: event._id,
-            title: "Worked from " + checkInDate.toUTCString().split(" ")[4] + " to " + checkOutDate.toUTCString().split(" ")[4],
+            title: "Worked from " + localCheckInTime + " to " + localCheckOutTime,
             start: new Date(
                 checkInDate.getUTCFullYear(),
                 checkInDate.getUTCMonth(),

@@ -31,7 +31,6 @@ export default function LeaveRequests() {
           variant: "default"
         })
       }
-      console.log("this is leave:", res.data.messages)
       setLeaveRequests(res.data.messages);
       toast({
         title: "Success",
@@ -54,13 +53,11 @@ export default function LeaveRequests() {
 
   const handleStatusChange = async (id: string, newStatus: "APPROVED" | "DECLINED" | "REVIEW") => {
     try {
-      console.log(id, newStatus)
       setLeaveRequests((prevRequests) =>
         prevRequests.map((request) => (request?._id === id ? { ...request, status: newStatus } : request)),
       )
       const response = await axios.post(`/api/update-request`, { id, status: newStatus });
       if(response.data.success===true){
-        console.log(response.data.messages)
         toast({
           title: "Success",
           description: response.data.messages,
