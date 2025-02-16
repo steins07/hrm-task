@@ -23,7 +23,6 @@ import EmployeeTable from "@/components/EmployeeTable"
 import Paginator from "@/components/Paginator"
 import { Separator } from "@/components/ui/separator"
 
-
 interface Attendance {
   date: string
   checkIn: string
@@ -60,6 +59,7 @@ export default function Dashboard() {
   })
 
 
+
   // Change page
   const paginate = (pageNumber: number) => {
     setCurrentPage(pageNumber);
@@ -91,9 +91,7 @@ export default function Dashboard() {
 
   const getRecentAttendance = useCallback(async () => {
     try {
-      const res = await axios.get(`/api/get-attendance/${user?._id}`, {
-        timeout: 5000, // Timeout set to 5000ms (5 seconds)
-      });
+      const res = await axios.get(`/api/get-attendance/${user?._id}`);
       setLastAttendance(res.data.lastAttendance);
     } catch (error) {
       const axiosError = error as AxiosError<IApiResponse>;
