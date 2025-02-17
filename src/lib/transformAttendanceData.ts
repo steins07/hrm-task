@@ -22,18 +22,10 @@ export default function transformAttendanceData(data: Attendance[]) {
             id: event._id,
             title: "Worked from " + localCheckInTime + " to " + localCheckOutTime,
             start: new Date(
-                checkInDate.getUTCFullYear(),
-                checkInDate.getUTCMonth(),
-                checkInDate.getUTCDate(),
-                checkInDate.getUTCHours(),
-                checkInDate.getUTCMinutes()
+                checkInDate
             ),
             end: new Date(
-                checkOutDate.getUTCFullYear(),
-                checkOutDate.getUTCMonth(),
-                checkOutDate.getUTCDate(),
-                checkOutDate.getUTCHours(),
-                checkOutDate.getUTCMinutes()
+                checkOutDate
             ),
         };
     });
