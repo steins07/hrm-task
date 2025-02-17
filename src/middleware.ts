@@ -22,12 +22,12 @@ export async function middleware(request: NextRequest) {
     }
 
     // Redirect non-authenticated users trying to access protected routes
-    if (!token && (url.pathname.startsWith('/dashboard') || url.pathname.startsWith('/employee')||url.pathname === '/add-employee')) {
+    if (!token && (url.pathname.startsWith('/dashboard') || url.pathname.startsWith('/employee')||url.pathname === '/add-employee')||url.pathname === '/') {
         return NextResponse.redirect(new URL('/sign-in', request.url));
     }
 
     // Redirect users who are NOT HR when trying to access restricted areas
-    if (token && role !== 'HR' && (url.pathname.startsWith('/employee')||url.pathname === '/add-employee')) {
+    if (token && role !== 'HR' && (url.pathname.startsWith('/employee')||url.pathname === '/add-employee')||url.pathname === '/') {
         return NextResponse.redirect(new URL('/dummy-page', request.url));
     }
 
