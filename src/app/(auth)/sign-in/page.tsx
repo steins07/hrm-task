@@ -51,6 +51,7 @@ const SignIn = () => {
                     variant: "destructive",
                 });
             }
+            setIsSubmitting(false);
         }
 
         if (result?.url) {
