@@ -8,9 +8,8 @@ export async function GET(request: NextRequest, { params }: { params: Params }) 
     await dbConnect();
 
     try {
-        const { id } = params;
+        const { id } = await params;
 
-        console.log("ID:",id);
         if (!id || typeof id !== "string") {
             return Response.json(
                 { success: false, messages: "Invalid or missing user ID", data:null },
