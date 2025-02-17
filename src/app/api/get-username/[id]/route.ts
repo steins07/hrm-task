@@ -18,7 +18,7 @@ export async function GET(request: NextRequest, { params }: { params: Params }) 
         }
 
         const user = await UserModel.findById(id).select("username");
-        console.log("User:",user);
+      
 
         if (!user) {
             return Response.json(
