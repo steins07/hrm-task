@@ -2,24 +2,22 @@ import dbConnect from "@/lib/dbConnect";
 import { UserModel } from "@/model/AllModels";
 import { NextRequest } from "next/server";
 
-type Params = { id: string };
-
-export async function GET(request: NextRequest, { params }: { params: Params }) {
+type Params = Promise<{ id: string; }>
+export async function GET(
+    request: NextRequest,
+    { params }: { params: Params }
+) {
     await dbConnect();
-
     try {
         const { id } = await params;
-
         if (!id || typeof id !== "string") {
             return Response.json(
-                { success: false, messages: "Invalid or missing user ID", data:null },
+                { success: false, messages: "Invalid or missing user ID", data: null },
                 { status: 400 }
             );
         }
 
         const user = await UserModel.findById(id).select("username");
-      
-
         if (!user) {
             return Response.json(
                 { success: false, messages: "User not found", data: null },
@@ -31,6 +29,7 @@ export async function GET(request: NextRequest, { params }: { params: Params }) 
             { success: true, messages: "User found", data: user.username },
             { status: 200 }
         );
+        
     } catch (error) {
         console.error("Error fetching user:", error);
         return Response.json(
@@ -39,3 +38,6 @@ export async function GET(request: NextRequest, { params }: { params: Params }) 
         );
     }
 }
+
+
+
