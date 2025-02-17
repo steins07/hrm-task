@@ -18,6 +18,7 @@ interface LeaveRequest {
 
 export default function LeaveRequests() {
   const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>([])
+  const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast();
 
 
@@ -32,6 +33,7 @@ export default function LeaveRequests() {
   };
 
   const allLeaveRequest = useCallback(async () => {
+    setIsLoading(true)
     try {
       const res = await axios.get("/api/get-leave-request");
       if (!res.data) {
@@ -61,6 +63,9 @@ export default function LeaveRequests() {
         description: "Failed to fetch leave requests",
         variant: "destructive"
       })
+    }
+    finally{
+      setIsLoading(false)
     }
   }, [toast])
 
@@ -107,7 +112,7 @@ export default function LeaveRequests() {
           </tr>
         </thead>
         <tbody>
-          {leaveRequests.map((request, index) => (
+          {!isLoading && (leaveRequests.map((request, index) => (
             <tr key={index}>
               <td className="py-2 px-4 border-b">
                 <Link href={`/employee/${request.userId}`} className="text-black hover:underline">
@@ -155,7 +160,29 @@ export default function LeaveRequests() {
                 )}
               </td>
             </tr>
-          ))}
+          )))}
+          {isLoading && (
+            ( <tr>
+              <td className="py-2 px-4 border-b">
+                <div className="h-6 bg-gray-300 rounded w-32 animate-pulse"></div>
+              </td>
+              <td className="py-2 px-4 border-b">
+                <div className="h-6 bg-gray-300 rounded w-24 animate-pulse"></div>
+              </td>
+              <td className="py-2 px-4 border-b">
+                <div className="h-6 bg-gray-300 rounded w-40 animate-pulse"></div>
+              </td>
+              <td className="py-2 px-4 border-b">
+                <div className="h-6 bg-gray-300 rounded w-20 animate-pulse"></div>
+              </td>
+              <td className="py-2 px-4 border-b">
+                <div className="h-6 bg-gray-300 rounded w-52 animate-pulse"></div>
+              </td>
+              <td className="py-2 px-4 border-b">
+                <div className="h-8 bg-gray-300 rounded w-32 animate-pulse"></div>
+              </td>
+            </tr>) 
+          )}
         </tbody>
       </table>
     </div>
