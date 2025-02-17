@@ -20,6 +20,17 @@ export default function LeaveRequests() {
   const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>([])
   const { toast } = useToast();
 
+
+  const fetchUserName = async (userId: string): Promise<string> => {
+    try {
+      const res = await axios.get(`/api/get-username/${userId}`);
+      return res.data?.data || "Unknown";
+    } catch (error) {
+      console.error("Error fetching user name:", error);
+      return "Unknown";
+    }
+  };
+
   const allLeaveRequest = useCallback(async () => {
     try {
       const res = await axios.get("/api/get-leave-request");
@@ -31,7 +42,13 @@ export default function LeaveRequests() {
           variant: "default"
         })
       }
-      setLeaveRequests(res.data.messages);
+      // Sequentially fetching user names for each request
+      const leaveRequestsWithNames: LeaveRequest[] = [];
+      for (const request of res.data.messages) {
+        request.userName = await fetchUserName(request.userId);
+        leaveRequestsWithNames.push(request);
+      }
+      setLeaveRequests(leaveRequestsWithNames);
       toast({
         title: "Success",
         description: "Leave request fetched successfully",
@@ -57,7 +74,7 @@ export default function LeaveRequests() {
         prevRequests.map((request) => (request?._id === id ? { ...request, status: newStatus } : request)),
       )
       const response = await axios.post(`/api/update-request`, { id, status: newStatus });
-      if(response.data.success===true){
+      if (response.data.success === true) {
         toast({
           title: "Success",
           description: response.data.messages,
@@ -93,8 +110,8 @@ export default function LeaveRequests() {
           {leaveRequests.map((request, index) => (
             <tr key={index}>
               <td className="py-2 px-4 border-b">
-                <Link href={`/employee/${request.userId}`} className="text-blue-600 hover:underline">
-                  {request.userId}
+                <Link href={`/employee/${request.userId}`} className="text-black hover:underline">
+                  {request.userName}
                 </Link>
               </td>
               <td className="py-2 px-4 border-b">{request.type}</td>
